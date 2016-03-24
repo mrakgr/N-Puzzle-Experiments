@@ -8,7 +8,7 @@
     <ProjectGuid>fdc752d2-30a3-4c4b-91f1-ce897eda31dd</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>ConsoleApplication1</RootNamespace>
-    <AssemblyName>ConsoleApplication1</AssemblyName>
+    <AssemblyName>N Puzzle Pattern Database</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
@@ -31,11 +31,12 @@
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\Release\ConsoleApplication1.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -50,6 +51,9 @@
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
     <None Include="n_puzzle_fringe_search.fsx" />
+    <Compile Include="n_puzzle_pattern_builder.fs" />
+    <None Include="n_puzzle_pattern_database.fsx" />
+    <Compile Include="n_puzzle_pattern_database_v2.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

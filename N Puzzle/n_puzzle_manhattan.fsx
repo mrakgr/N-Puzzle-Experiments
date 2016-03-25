@@ -1,12 +1,8 @@
-﻿// The third version of the pattern database. Same as before, but this one loads the files in the Test Cases directory and iterates over them.
+﻿// The Manhattan distance heuristic as a baseline.
+// Meh. It just gets stuck on the third test case.
 
 open System
 open System.Collections.Generic
-
-#if INTERACTIVE
-#load "n_puzzle_pattern_builder.fs"
-#endif
-open PatternBuilder
 
 type Moves =
 | UP = 0
@@ -15,68 +11,6 @@ type Moves =
 | DOWN = 3
 
 let stopwatch = Diagnostics.Stopwatch.StartNew()
-let value_functions =
-    let mapping_function_fringe =
-        function
-        | 0uy -> 1uy
-        | 3uy -> 2uy
-        | 7uy -> 3uy
-        | 11uy -> 4uy
-        | 12uy -> 5uy
-        | 13uy -> 6uy
-        | 14uy -> 7uy
-        | 15uy -> 8uy
-        | _ -> 0uy
-
-    let mapping_function_corner =
-        function
-        | 0uy -> 1uy
-        | 8uy -> 2uy
-        | 9uy -> 3uy
-        | 10uy -> 4uy
-        | 12uy -> 5uy
-        | 13uy -> 6uy
-        | 14uy -> 7uy
-        | 15uy -> 8uy
-        | _ -> 0uy
-
-    let mapping_function_box_ul =
-        function
-        | 0uy -> 1uy
-        | 1uy -> 2uy
-        | 2uy -> 3uy
-        | 4uy -> 4uy
-        | 5uy -> 5uy
-        | 6uy -> 6uy
-        | _ -> 0uy
-
-    let mapping_function_box_lr =
-        function
-        | 0uy -> 1uy
-        | 5uy -> 2uy
-        | 6uy -> 3uy
-        | 8uy -> 4uy
-        | 9uy -> 5uy
-        | 10uy -> 6uy
-        | _ -> 0uy
-    [|
-    mapping_function_fringe,IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_fringe.dat"), IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_fringe.carr")
-    mapping_function_corner,IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_corner.dat"), IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_corner.carr")
-    mapping_function_box_ul,IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_ul.dat"), IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_ul.carr")
-    mapping_function_box_lr,IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_lr.dat"), IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_lr.carr")
-    |]
-    |> Array.map (
-        fun (f,filename_dat,filename_carr) ->
-        if IO.File.Exists filename_dat && IO.File.Exists filename_carr 
-        then f, (IO.File.ReadAllBytes(filename_dat), IO.File.ReadAllBytes(filename_carr) |> Array.map int64)
-        else 
-            f, get_value_function_for_pattern 4 f
-               |> fun (dat,carr as x) ->
-                  IO.File.WriteAllBytes(filename_dat, dat)
-                  IO.File.WriteAllBytes(filename_carr, carr |> Array.map byte)
-                  x)
-
-printfn "Time elapsed to calculate (or load) the value functions: %A" stopwatch.Elapsed
 
 let fact =
     [|
@@ -230,17 +164,16 @@ let run_n_puzzle_solver_on_file file =
             let inline check_victory (ar: int64) =
                 ar = victory
    
-            let inline heuristic_function (ar: _[]) =
-                value_functions
-                |> Array.map(
-                    fun (map_f, (val_f, carr)) ->
-                        ar
-                        |> Array.map map_f
-                        |> multinomial_encoder carr
-                        |> fun x -> val_f.[int x]
-                        |> fun x -> x)
-                |> Array.max
-                //|> fun x -> x/4uy
+            let inline heuristic_function (ar: _[]) = // Just Manhattan for now.
+                let inline manhattan_distance_for_a_single_tile e (r,c) =
+                    if e <> 0 then abs(r-(e / k)) + abs(c-(e % k)) else 0
+
+                let mutable s = 0
+                for r=0 to k-1 do
+                    for c=0 to k-1 do
+                        let e = ar.[r*k+c] |> int
+                        s <- s + manhattan_distance_for_a_single_tile e (r,c)
+                byte s
         
 
             let get_trace_from (p: byte[]) =
@@ -354,6 +287,7 @@ let stopwatch2 = Diagnostics.Stopwatch.StartNew()
 
 IO.Path.Combine(__SOURCE_DIRECTORY__,"Test Cases")
 |> IO.Directory.GetFiles
+|> Array.take 10
 |> Array.map(
     fun x ->
         run_n_puzzle_solver_on_file x

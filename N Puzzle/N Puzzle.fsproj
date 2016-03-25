@@ -55,6 +55,7 @@
     <Compile Include="n_puzzle_pattern_builder.fs" />
     <None Include="n_puzzle_pattern_database.fsx" />
     <None Include="n_puzzle_pattern_database_v2.fsx" />
+    <None Include="n_puzzle_manhattan.fsx" />
     <Compile Include="n_puzzle_pattern_database_v3.fs" />
   </ItemGroup>
   <PropertyGroup>

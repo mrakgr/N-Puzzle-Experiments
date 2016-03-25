@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>fdc752d2-30a3-4c4b-91f1-ce897eda31dd</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ConsoleApplication1</RootNamespace>
+    <RootNamespace>N Puzzle Solver</RootNamespace>
     <AssemblyName>N Puzzle Pattern Database</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -51,9 +51,11 @@
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
     <None Include="n_puzzle_fringe_search.fsx" />
+    <None Include="random_puzzle_generator.fsx" />
     <Compile Include="n_puzzle_pattern_builder.fs" />
     <None Include="n_puzzle_pattern_database.fsx" />
-    <Compile Include="n_puzzle_pattern_database_v2.fs" />
+    <None Include="n_puzzle_pattern_database_v2.fsx" />
+    <Compile Include="n_puzzle_pattern_database_v3.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

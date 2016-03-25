@@ -6,8 +6,10 @@
 open System
 open System.Collections.Generic
 
-#load "n_puzzle_pattern_builder.fsx"
-open N_puzzle_pattern_builder
+#if INTERACTIVE
+#load "n_puzzle_pattern_builder.fs"
+#endif
+open PatternBuilder
 
 let k = 4
 

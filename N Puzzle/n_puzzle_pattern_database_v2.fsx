@@ -4,6 +4,9 @@
 open System
 open System.Collections.Generic
 
+#if INTERACTIVE
+#load "n_puzzle_pattern_builder.fs"
+#endif
 open PatternBuilder
 
 let k = 4
@@ -77,7 +80,7 @@ let init_pos, init = (1, 2), [|15uy; 12uy; 9uy; 14uy; 5uy; 4uy; 0uy; 1uy; 3uy; 6
 //let init_pos, init = (0,2), [|2;3;0;8;15;12;6;7;13;1;4;9;14;11;10;5|] |> Array.map byte // Unsolvable
 //let init_pos, init = (0,3),   [|1uy; 2uy; 3uy; 0uy; 5uy; 12uy; 7uy; 4uy; 13uy; 6uy; 14uy; 9uy; 10uy; 8uy; 11uy; 15uy|] // Unsolvable
 //let init_pos, init = (1,2), [|1uy; 2uy; 3uy; 4uy; 5uy; 6uy; 0uy; 8uy; 9uy; 10uy; 7uy; 12uy; 13uy; 14uy; 11uy; 15uy|] // Unsolvable
-//let init_pos, init = (1,2), [|1uy; 2uy; 3uy; 4uy; 5uy; 6uy; 0uy; 8uy; 9uy; 10uy; 7uy; 12uy; 13uy; 14uy; 11uy; 15uy|]
+//let init_pos, init = (1,2), [|1uy; 2uy; 3uy; 4uy; 5uy; 6uy; 0uy; 8uy; 9uy; 10uy; 7uy; 12uy; 13uy; 14uy; 11uy; 15uy|] // Unsolvable
 //     """ 1  2  3  4 
 // 5  6  0  8 
 // 9 10  7 12 
@@ -85,6 +88,8 @@ let init_pos, init = (1, 2), [|15uy; 12uy; 9uy; 14uy; 5uy; 4uy; 0uy; 1uy; 3uy; 6
 //    |> fun x -> x.Split [|' ';'\n'|] 
 //    |> Array.filter (fun x -> x <> "")
 //    |> Array.map (System.Int32.Parse >> byte)
+
+let init, init_pos = [|[|1uy..15uy|];[|0uy|]|] |> Array.concat, (3,3)
 
 let parity_check =
     let mutable num_inversions = 0

@@ -13,6 +13,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>N Puzzle</Name>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,26 +40,6 @@
     <DocumentationFile>bin\Release\ConsoleApplication1.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <None Include="App.config" />
-    <None Include="n_puzzle_fringe_search.fsx" />
-    <None Include="random_puzzle_generator.fsx" />
-    <Compile Include="n_puzzle_pattern_builder.fs" />
-    <None Include="n_puzzle_pattern_database.fsx" />
-    <None Include="n_puzzle_pattern_database_v2.fsx" />
-    <None Include="n_puzzle_manhattan.fsx" />
-    <Compile Include="n_puzzle_pattern_database_v3.fs" />
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -74,6 +56,49 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <ItemGroup>
+    <Content Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
+    <None Include="App.config" />
+    <None Include="n_puzzle_fringe_search.fsx" />
+    <None Include="random_puzzle_generator.fsx" />
+    <Compile Include="n_puzzle_pattern_builder.fs" />
+    <None Include="n_puzzle_pattern_database.fsx" />
+    <None Include="n_puzzle_pattern_database_v2.fsx" />
+    <None Include="n_puzzle_manhattan.fsx" />
+    <None Include="n_puzzle_pattern_database_v3.fsx" />
+    <Compile Include="n_puzzle_pattern_database_v4.fs" />
+    <None Include="nn_diffsharp_xor_example.fsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="DiffSharp">
+      <HintPath>..\packages\DiffSharp.0.7.7\lib\net46\DiffSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Charting">
+      <HintPath>..\packages\FSharp.Charting.0.90.13\lib\net40\FSharp.Charting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Quotations.Evaluator">
+      <HintPath>..\packages\FSharp.Quotations.Evaluator.1.0.6\lib\net40\FSharp.Quotations.Evaluator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+  </ItemGroup>
+  <Import Project="..\packages\DiffSharp.0.7.7\build\DiffSharp.targets" Condition="Exists('..\packages\DiffSharp.0.7.7\build\DiffSharp.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\DiffSharp.0.7.7\build\DiffSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DiffSharp.0.7.7\build\DiffSharp.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

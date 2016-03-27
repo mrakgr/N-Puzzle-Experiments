@@ -1,4 +1,4 @@
-﻿// The third version of the pattern database. Same as before, but this one loads the files in the Test Cases directory and iterates over them.
+﻿// This version rotates the puzzle 180 degress before solving it in order to solve the other invariant that the Algorithms assignment uses.
 
 open System
 open System.Collections.Generic
@@ -15,6 +15,12 @@ type Moves =
 | DOWN = 3
 
 let stopwatch = Diagnostics.Stopwatch.StartNew()
+let logging = IO.File.AppendText(IO.Path.Combine(__SOURCE_DIRECTORY__,"logging.log"))
+logging.AutoFlush <- true
+
+logging.WriteLine("-----")
+logging.WriteLine(sprintf "Starting Session: %A" DateTime.Now)
+
 let value_functions =
     let mapping_function_fringe =
         function
@@ -76,6 +82,7 @@ let value_functions =
                   IO.File.WriteAllBytes(filename_carr, carr |> Array.map byte)
                   x)
 
+logging.WriteLine(sprintf "Time elapsed to calculate (or load) the value functions: %A" stopwatch.Elapsed)
 printfn "Time elapsed to calculate (or load) the value functions: %A" stopwatch.Elapsed
 
 let fact =
@@ -91,10 +98,13 @@ let fact =
 let run_n_puzzle_solver_on_file file =
     let k, init, init_pos = 
         let t = 
+            logging.WriteLine(sprintf "Loading file %s..." file)
             printfn "Loading file %s..." file
             IO.File.ReadAllText(file)
             |> fun x -> x.Split() |> Array.filter ((<>)"") 
         let k = t.[0] |> int
+
+        let size = k*k |> byte
 
         if k <> 4 then failwith "This solver can only solve 4x4 puzzles."
         if t.Length <> 17 then failwithf "Invalid input in file %s." file
@@ -102,6 +112,8 @@ let run_n_puzzle_solver_on_file file =
         let init = 
             t.[1..] 
             |> Array.map byte
+            |> Array.rev
+            |> Array.map (fun x -> (size - x) % size)
         let init_pos =
             init |> Array.findIndex ((=)0uy) // Partial application of the = operator.
                  |> fun x -> x/k,x%k
@@ -125,6 +137,7 @@ let run_n_puzzle_solver_on_file file =
             else num_inversions % 2 = 1
 
     if parity_check = false then 
+        logging.WriteLine(sprintf "The puzzle %A is unsolvable. Skipping file..." init)
         printfn "The puzzle %A is unsolvable. Skipping file..." init
         0
     else
@@ -240,8 +253,7 @@ let run_n_puzzle_solver_on_file file =
                         |> fun x -> val_f.[int x]
                         |> fun x -> x)
                 |> Array.max
-                //|> fun x -> x/4uy
-        
+                
 
             let get_trace_from (p: byte[]) =
                 let rec get_trace_from (p: byte[]) (cur_r, cur_c as cur_zero) cur_heuristic accum =
@@ -284,7 +296,6 @@ let run_n_puzzle_solver_on_file file =
             let mutable now = Stack(2000)
             let mutable later_upper_bound = Int32.MaxValue
             let mutable final_state = [||]
-            let mutable max_len = 5
             let mutable num_ops = 0
 
             let rec fringe_search (upper_bound : int) =
@@ -335,10 +346,14 @@ let run_n_puzzle_solver_on_file file =
             
             let c = heuristic_function init
             now.Push((init_pos,init,1,c))
-            set_trace (multinomial_encoder carr init) 1
-            fringe_search <| int c
+            let t = multinomial_encoder carr init
+            if check_victory t = false then
+                set_trace t 1
+                fringe_search <| int c
 
-            max_goal-1, get_trace_from final_state
+                max_goal-1, get_trace_from final_state
+            else
+                0, []
 
 
         stopwatch.Restart()
@@ -347,17 +362,23 @@ let run_n_puzzle_solver_on_file file =
             |> fun (max_goal, trace as x) -> 
                 if max_goal <> trace.Length then failwith "max_goal <> trace.Length"
                 x
+        logging.WriteLine(sprintf "Time elapsed to solve the N puzzle: %A" stopwatch.Elapsed)
+        logging.WriteLine(sprintf "Moves taken: %i" max_goal)
         printfn "Time elapsed to solve the N puzzle: %A" stopwatch.Elapsed
+        printfn "Moves taken: %i" max_goal
         1
 
 let stopwatch2 = Diagnostics.Stopwatch.StartNew()
 
-IO.Path.Combine(__SOURCE_DIRECTORY__,"Test Cases")
+IO.Path.Combine(__SOURCE_DIRECTORY__,"Test Cases for v4")
 |> IO.Directory.GetFiles
 |> Array.map(
     fun x ->
         run_n_puzzle_solver_on_file x
     )
-|> fun x -> printfn "Solved %i/%i." (x |> Array.sum) (x |> Array.length)
+|> fun x -> 
+    logging.WriteLine(sprintf "Solved %i/%i." (x |> Array.sum) (x |> Array.length))
+    printfn "Solved %i/%i." (x |> Array.sum) (x |> Array.length)
 
+logging.WriteLine(sprintf "Total time elapsed: %A" stopwatch2.Elapsed)
 printfn "Total time elapsed: %A" stopwatch2.Elapsed

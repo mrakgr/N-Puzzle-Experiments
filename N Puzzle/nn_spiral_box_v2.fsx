@@ -27,7 +27,8 @@ only an output layer.
 // The training is rather slow because the WTA autoencoder cannot handle inputs with large columns.
 // It might be worth replacing it with relu + dropout.
 
-//
+// Before that to get the full benefit from sparsity, I need convolutional nets. Even more than the WTA function, they are the
+// best sparsity constraint in current time.
 
 #if INTERACTIVE
 #r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"

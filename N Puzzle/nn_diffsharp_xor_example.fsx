@@ -39,9 +39,9 @@ let createNetwork (l:int[]) =
     {layers = Array.init (l.Length - 1) (fun i ->
         let l1 = l.[i + 1]
         let l2 = l.[i]
-        let s = l1+l2 |> float |> sqrt
-        {W = DM.init l1 l2  (fun _ _ -> (-0.5 + rng.NextDouble()) / s |> float32 )
-         b = DV.init l1 (fun _ -> (-0.5 + rng.NextDouble()) / s |> float32 )
+        let s = l1+l2 |> float |> fun x -> 2.0 / sqrt x
+        {W = DM.init l1 l2  (fun _ _ -> (-0.5 + rng.NextDouble()) * s |> float32 )
+         b = DV.init l1 (fun _ -> (-0.5 + rng.NextDouble()) * s |> float32 )
          a = sigmoid })}
 
 let cross_entropy_cost (inputs:DM) (targets:DM) =
@@ -95,7 +95,7 @@ let XORy =
     |> DM.transpose
 
 // 2 inputs, 3 neurons in a hidden layer, 1 neuron in the output layer
-let net3 = createNetwork [|2; 15; 1|]
+let net3 = createNetwork [|2; 3; 1|]
 
 // Train
 let train3 = backprop net3 4.0f 1000 4 cross_entropy_cost XORx XORy

@@ -35,12 +35,11 @@ let _, (inputs_outputs), carr =
         | _ -> 0uy
     (mapping_function_box_lr,IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_lr.dat"), IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_lr.carr"))
     |> fun (f,filename_dat,filename_carr) -> 
-        (f, IO.File.ReadAllBytes(filename_dat).[0..2560-1], IO.File.ReadAllBytes(filename_carr) |> Array.map int64)
+        let chunk_size = 2560
+        (f, IO.File.ReadAllBytes(filename_dat).[0..chunk_size-1], IO.File.ReadAllBytes(filename_carr) |> Array.map int64)
         |> fun (f, value_function, carr) ->
         f,
         (
-        let chunk_size = 2560
-
         let outputs =
             value_function
             |> Array.chunkBySize chunk_size
@@ -66,9 +65,10 @@ let _, (inputs_outputs), carr =
 
 let layers = 
     [|
-    FeedforwardLayer.createRandomLayer 3072 112 tanh_
-    FeedforwardLayer.createRandomLayer 3072 3072 tanh_
-    FeedforwardLayer.createRandomLayer 255 3072 (clipped_steep_sigmoid 3.0f)
+    FeedforwardLayer.createRandomLayer 1024 112 relu
+    FeedforwardLayer.createRandomLayer 1024 1024 relu
+    FeedforwardLayer.createRandomLayer 1024 1024 relu
+    FeedforwardLayer.createRandomLayer 255 1024 (clipped_steep_sigmoid 3.0f)
     |]
 
 // This does not actually train it, it just initiates the tree for later training.
@@ -102,9 +102,11 @@ let train_sgd num_iters learning_rate (layers: FeedforwardLayer[]) =
 
         printfn "The training cost at iteration %i is %f" i r'
         printfn "The accuracy at iteration is %f" acc
-        yield r', acc
+        yield acc
         r' <- 0.0f
         acc <- 0.0f
     |]
 
-train_sgd 1000 0.005f layers
+train_sgd 3000 0.005f layers
+|> Chart.FastLine
+|> Chart.Show

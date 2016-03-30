@@ -11,3 +11,11 @@ Of the test cases, most take less than a second with some taking up to a minute.
 Now comes the interesting part. For the first time since I started programming a year and a month ago, I now have the skills and the tools to actually make neural nets do something useful, which is compress those huge 500Mb value function files to something manageable.
 
 I am really curious how well it would go. I have no idea what sort of error rate or compression ration can even be expected at all. How will adding layers affect things? How will I transform the architecture gradually? There is a wide world out there waiting for me.
+
+3/30/2016: Where did the last five days ago? I did all sorts of experimenting and managed to compress 1/2000th of the 5MB pattern at a 90% accuracy. At first I thought it was due to unsupervised learning, but it seems the net learns much faster with smaller minibatches.
+
+5Mb seems small at a first glance and I did not expect it to be hard, but it turns out once I unpack the scalars into one-hot encodings and turn them into floats, the 5MB pattern turns into 7Gb. Yikes!
+
+I also seem to be making progress at a really snail's pace. What I am going to do is switch to the 3x3 puzzle and try to solve that. The total number of states for the 3x3 puzzle is only around 180k which is 30 times less than even the "small" 4x4 pattern. Before I do that, I'll first resume work on the [Spiral library](https://github.com/mrakgr/Spiral-V2) and finally do it the right way, along with the convolutional functions.
+
+This will only take me a week or two hopefully, but after I do this I will be ready to deal with the 3x3 puzzle. After that I'll think about my next move.

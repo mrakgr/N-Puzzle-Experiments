@@ -2150,7 +2150,7 @@ let nesterov_add_gradients (base_nodes: DM[]) (momentum_matrices: dMatrix[]) (co
         let x = base_nodes.[i] 
         let m = momentum_matrices.[i]
         let c = copy_weights.[i]
-        gradclipModule.Value.A(clip_coef,x.r.A,x.r.A)
+        if clip_coef <> 0.0f then gradclipModule.Value.A(clip_coef,x.r.A,x.r.A)
         geam2 nT nT -learning_rate x.r.A momentum_rate m m // Add the gradients to the momentum matrices
         geam2 nT nT 1.0f m 1.0f c c // Add momentum to the copy matrix
         geam2 nT nT 1.0f c momentum_rate m x.r.P // Apply Nesterov's momentum to the weights. It is really the copy weights that serve as the basis.

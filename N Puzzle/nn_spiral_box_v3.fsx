@@ -30,6 +30,13 @@ only an output layer.
 // Before that to get the full benefit from sparsity, I need convolutional nets. Even more than the WTA function, they are the
 // best sparsity constraint in current time.
 
+// Edit: Let me test just the relu's before I do anything else. I have a lot of work left to do on the library.
+
+// Edit: How embarrasing. I sized the minibatch's minibatch 5x smaller than I thought it was. It turns out 
+// that is the entire reason for the sudden spike in performance. Unsupervised learning had nothing to do with it.
+
+// ...Unsupervised learning is a turd. I might as well ditch it and add NAG instead.
+
 #if INTERACTIVE
 #r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"
 #r "System.Windows.Forms.DataVisualization.dll"
@@ -56,46 +63,45 @@ let _, (inputs_outputs), carr =
     (mapping_function_box_lr,IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_lr.dat"), IO.Path.Combine(__SOURCE_DIRECTORY__,"mapping_function_box_lr.carr"))
     |> fun (f,filename_dat,filename_carr) -> 
         let chunk_size = 2560
-        let mini_batch_size = 
-            let t = 20 // This is so wrong. Shit.
-            if chunk_size % t = 0 then chunk_size / t else failwithf "%i %% %i <> 0" chunk_size t
+        let minibatch_size = 64
+        if chunk_size % minibatch_size <> 0 then failwithf "%i %% %i <> 0" chunk_size minibatch_size
         (f, IO.File.ReadAllBytes(filename_dat).[0..chunk_size-1], IO.File.ReadAllBytes(filename_carr) |> Array.map int64)
         |> fun (f, value_function, carr) ->
         f,
         (
         let outputs =
             value_function
-            |> Array.chunkBySize mini_batch_size
+            |> Array.chunkBySize minibatch_size
             |> Array.map ( fun x ->
                 x 
                 |> array_decoder 255
-                |> fun x -> DM.makeConstantNode(255,mini_batch_size,x)
+                |> fun x -> DM.makeConstantNode(255,minibatch_size,x)
                 )
 
         let inputs = 
             [|0L..value_function.Length-1 |> int64|]
-            |> Array.chunkBySize mini_batch_size
+            |> Array.chunkBySize minibatch_size
             |> Array.map (fun x ->
                 x 
                 |> Array.map (multinomial_decoder carr >> array_decoder 7)
                 |> Array.concat
-                |> fun x -> DM.makeConstantNode(7*16,mini_batch_size,x)
+                |> fun x -> DM.makeConstantNode(7*16,minibatch_size,x)
                 )
                 
         Array.zip inputs outputs
         ),
         carr
 
-let l1 = FeedforwardLayer.createRandomLayer 1024 112 (WTA 6)
-let l2 = FeedforwardLayer.createRandomLayer 1024 1024 (WTA 6)
-let l3 = FeedforwardLayer.createRandomLayer 1024 1024 (WTA 6)
+let l1 = FeedforwardLayer.createRandomLayer 1024 112 tanh_
+let l2 = FeedforwardLayer.createRandomLayer 1024 1024 tanh_
+let l3 = FeedforwardLayer.createRandomLayer 1024 1024 tanh_
 let l4 = InverseFeedforwardLayer.createRandomLayer l3 id // No nonlinearity at the end. Linearities in the final layet cause the individual layers to overfit too badly.
 let l5 = InverseFeedforwardLayer.createRandomLayer l2 id
 let l6 = InverseFeedforwardLayer.createRandomLayer l1 id
 
-let l1' = FeedforwardLayer.fromArray l1.ToArray relu // Makes supervised layers from the same weights.
-let l2' = FeedforwardLayer.fromArray l2.ToArray relu
-let l3' = FeedforwardLayer.fromArray l3.ToArray relu
+let l1' = FeedforwardLayer.fromArray l1.ToArray tanh_ // Makes supervised layers from the same weights.
+let l2' = FeedforwardLayer.fromArray l2.ToArray tanh_
+let l3' = FeedforwardLayer.fromArray l3.ToArray tanh_
 let l_sig = FeedforwardLayer.createRandomLayer 255 1024 (clipped_steep_sigmoid 3.0f)
 
 let layers_deep_autoencoder = [|[|l1;l2;l3|] |> Array.map (fun x -> x :> IFeedforwardLayer);[|l4;l5;l6|] |> Array.map (fun x -> x :> IFeedforwardLayer);|] |> Array.concat // Upcasting to the base type. The deep autoencoder is not used in this example, but only serves an illustration here.
@@ -178,7 +184,7 @@ let train_sgd num_iters learning_rate training_loop (layers: IFeedforwardLayer[]
 
 let mutable loop_iter = 1
 
-for loop,layers,num_iters,learning_rate in [|loop_1,layers_1,300,0.01f;loop_2,layers_2,300,0.01f;loop_3,layers_3,300,0.01f;loop_3b,layers_fine_tune,300,0.01f;loop_fine_tune,layers_fine_tune,1000,0.01f|] do
+for loop,layers,num_iters,learning_rate in [|loop_1,layers_1,100,0.005f;loop_2,layers_2,100,0.005f;loop_3,layers_3,100,0.005f;loop_3b,layers_fine_tune,100,0.005f;loop_fine_tune,layers_fine_tune,2000,0.005f|] do
     printfn "Starting training loop %i..." loop_iter
     let s = train_sgd num_iters learning_rate loop layers
 

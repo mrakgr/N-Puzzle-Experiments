@@ -77,6 +77,8 @@
     <None Include="nn_spiral_box_v1.fsx" />
     <None Include="nn_mxnet_v0.fsx" />
     <None Include="nn_spiral_box_v2.fsx" />
+    <None Include="nn_spiral_box_v3.fsx" />
+    <None Include="nn_spiral_box_v4.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CudaBlas">

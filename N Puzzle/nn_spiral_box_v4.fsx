@@ -1,14 +1,7 @@
-﻿// Brought in Spiral. Even though it would be touting my own horn, but I should have started with it. Strangely enough it might be easier to use than 
-// DiffSharp. Apart from that...
+﻿// Yeah, it seems that my mistake of accidentally sizing the minibatches 20 was responsible for this good performance, not unsupervised learning.
+// This makes for a decent bit of comedy. Let me try Nesterov's momentum.
 
-// ...Hmmmm. I haven't tried pretraining yet, but it discourages me to see how much difficulty it is having in memorizing a single minibatch.
-// Adding layers actually makes the net harder to train, but does not bring performance benefits.
-
-// The two choices here are: do pretraining or bring in convolutional nets.
-// Spiral does not have convolutional layers net, but rather than add them, I want to try accessing MXNet via the R type provider.
-
-// If that fails I'll try pretraining and then add the convolutional functions into the library myself.
-// I'll do all three eventually anyway.
+// Edit: It makes things go a bit better.
 
 #if INTERACTIVE
 #r "../packages/FSharp.Charting.0.90.13/lib/net40/FSharp.Charting.dll"
@@ -80,11 +73,13 @@ let training_loop (data: DM) (targets: DM) (layers: FeedforwardLayer[]) =
     // although in this case it will be calculated at most once.
     lazy get_accuracy targets.r.P outputs.r.P, cross_entropy_cost targets outputs 
 
-let train_sgd num_iters learning_rate (layers: FeedforwardLayer[]) =
+let train_nag num_iters learning_rate (layers: FeedforwardLayer[]) =
     [|
     let mutable r' = 0.0f
     let mutable acc = 0.0f
     let base_nodes = layers |> Array.map (fun x -> x.ToArray) |> Array.concat // Stores all the base nodes of the layer so they can later be reset.
+    let copy_nodes = base_nodes |> Array.map (fun x -> x.r.P.copy())
+    let momentum_nodes = copy_nodes |> Array.map (fun x -> dMatrix.create(x.num_rows,x.num_cols) |> fun x -> x.setZero(); x)
     for i=1 to num_iters do
         for x in inputs_outputs do
             let data, target = x
@@ -99,7 +94,8 @@ let train_sgd num_iters learning_rate (layers: FeedforwardLayer[]) =
             tape.resetTapeAdjoint 0 // Resets the adjoints for the training select
             r.r.A := 1.0f // Pushes 1.0f from the top node
             tape.reversepropTape 0 // Resets the adjoints for the test select
-            add_gradients_to_weights' base_nodes learning_rate // The optimization step
+            //add_gradients_to_weights' base_nodes learning_rate // The optimization step
+            nesterov_add_gradients base_nodes momentum_nodes copy_nodes learning_rate 0.5f 0.0f
             tape.Clear 0 // Clears the tape without disposing it or the memory buffer. It allows reuse of memory for a 100% gain in speed for the simple recurrent and feedforward case.
 
         printfn "The training cost at iteration %i is %f" i r'
@@ -109,6 +105,6 @@ let train_sgd num_iters learning_rate (layers: FeedforwardLayer[]) =
         acc <- 0.0f
     |]
 
-train_sgd 200 0.005f layers
+train_nag 250 0.005f layers
 |> Chart.FastLine
 |> Chart.Show

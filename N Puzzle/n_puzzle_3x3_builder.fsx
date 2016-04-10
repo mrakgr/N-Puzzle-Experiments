@@ -1,14 +1,20 @@
-﻿// Returns a value function for a particular N puzzle pattern.
-// I completed this particular piece of code with remarkable smoothness.
+﻿// Returns the value function for the 3x3 puzzle.
 
-// Edit: This algorithm is not correct to calculate the full 3x3 puzzle because it does not take the invariants into consideration.
+module PatternBuilder3x3
 
-module PatternBuilder
+#if INTERACTIVE
+#load "nn_auxilaries.fs"
+#endif
+open NNAuxilaries
 
 open System
 open System.Collections.Generic
 
-let get_value_function_for_pattern k mapping_function =
+let k = 3
+let mapping_function = id
+let minibatch_size = 128
+
+let value_function, carr, number_of_examples =
     let final_state, init_pos = 
         [|0uy..k*k-1 |> byte|] // I am working backwards from the final state here.
         |> Array.map mapping_function
@@ -120,7 +126,7 @@ let get_value_function_for_pattern k mapping_function =
             | v -> c < v
             
 
-        while values_calculated < number_of_values do // Do BFS from the final state as long as all the values haven't been calculated.
+        while queue.Count > 0 do // Do BFS from the final state as long as all the values haven't been calculated.
             let (ar': int), i = queue.Dequeue()
             let ar = multinomial_decoder <| int64 ar'
             let one_r, one_c as one_pos =
@@ -149,16 +155,18 @@ let get_value_function_for_pattern k mapping_function =
             if_viable_execute (1+one_r,one_c) // DOWN
         value_function
 
-    bfs(), carr
+    (bfs(), carr)
+    |> fun (value_function, carr) ->
+        let adjusted_value_function =
+            [|
+            for i=0 to value_function.Length-1 do
+                if value_function.[i] <> 255uy then yield int64 i |> (multinomial_decoder >> array_decoder 9), value_function.[i] |> scalar_decoder 32
+            |]
+            |> Array.chunkBySize minibatch_size
+            |> Array.map (
+                fun x ->
+                let l,r = Array.unzip x
+                Array.concat l, Array.concat r
+                )
+        adjusted_value_function, carr, value_function.Length/2
 
-//let mapping_function = // I am aiming for the horizontal strip on the top with this one
-//    function
-//    | 0uy -> 1uy
-//    | 1uy -> 2uy
-//    | 2uy -> 3uy
-//    | 3uy -> 4uy
-//    | _ -> 0uy
-//
-//get_value_function_for_pattern 4 mapping_function
-//|> fst
-//|> Array.iteri (fun i x -> printfn "%i, %i" i x)

@@ -70,7 +70,6 @@
     <None Include="n_puzzle_pattern_database_v4.fsx" />
     <None Include="nn_diffsharp_xor_example.fsx" />
     <None Include="nn_diffsharp_box.fsx" />
-    <Compile Include="nn_auxilaries.fs" />
     <None Include="nn_diffsharp_box_v2.fsx" />
     <None Include="spiral.fsx" />
     <None Include="nn_spiral_box_v0.fsx" />
@@ -79,6 +78,13 @@
     <None Include="nn_spiral_box_v2.fsx" />
     <None Include="nn_spiral_box_v3.fsx" />
     <None Include="nn_spiral_box_v4.fsx" />
+    <Compile Include="nn_auxilaries.fs" />
+    <None Include="spiral_conv.fsx" />
+    <None Include="n_puzzle_3x3_builder.fsx" />
+    <None Include="nn_spiral_conv_3x3_residual_learning.fsx" />
+    <None Include="nn_spiral_conv_3x3_stochastic_depth.fsx" />
+    <None Include="nn_spiral_conv_3x3_batch_norm.fsx" />
+    <None Include="nn_spiral_conv_3x3_small_net.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CudaBlas">

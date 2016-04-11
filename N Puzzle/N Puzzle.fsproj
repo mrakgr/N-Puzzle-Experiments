@@ -85,6 +85,7 @@
     <None Include="nn_spiral_conv_3x3_stochastic_depth.fsx" />
     <None Include="nn_spiral_conv_3x3_batch_norm.fsx" />
     <None Include="nn_spiral_conv_3x3_small_net.fsx" />
+    <None Include="nn_spiral_conv_3x3_softmax.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CudaBlas">
